@@ -15,9 +15,10 @@ import {
 interface SidebarProps {
   currentPath: string;
   setPath: (path: string) => void;
+  operatorEmail: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentPath, setPath }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentPath, setPath, operatorEmail }) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'clients', label: 'Clients', icon: Users },
@@ -62,7 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, setPath }) => {
         </button>
         <div className="mt-4 px-3 py-2 bg-gray-800 rounded-lg">
           <p className="text-xs text-gray-500 uppercase font-bold tracking-widest">Operator</p>
-          <p className="text-sm font-medium text-blue-400 truncate">peter@wachaexperience.com</p>
+          <p className="text-sm font-medium text-blue-400 truncate">{operatorEmail}</p>
         </div>
       </div>
     </div>
