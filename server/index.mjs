@@ -26,9 +26,14 @@ const SESSION_COOKIE = "wea_session";
 const SESSION_MAX_AGE = 60 * 60 * 8;
 const SESSION_SECRET = process.env.SESSION_SECRET || "development-only-change-this-session-secret";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.API_KEY;
+const IS_NETLIFY = Boolean(process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME);
 
 if (IS_PRODUCTION && SESSION_SECRET.includes("development-only")) {
   throw new Error("SESSION_SECRET must be set to a strong random value in production.");
+}
+
+if (IS_NETLIFY && !process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL must be set for Netlify deployments so users and sessions persist.");
 }
 
 const store = process.env.DATABASE_URL

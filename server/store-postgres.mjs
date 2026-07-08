@@ -32,7 +32,9 @@ export class PostgresStore {
         name text not null,
         created_at timestamptz not null default now()
       );
+    `);
 
+    await this.query(`
       create table if not exists users (
         id text primary key,
         tenant_id text not null references tenants(id) on delete cascade,
@@ -42,17 +44,23 @@ export class PostgresStore {
         role text not null default 'member',
         created_at timestamptz not null default now()
       );
+    `);
 
+    await this.query(`
       create table if not exists app_state (
         tenant_id text primary key references tenants(id) on delete cascade,
         payload jsonb not null,
         updated_at timestamptz not null default now()
       );
+    `);
 
+    await this.query(`
       insert into tenants (id, name)
       values ($1, 'WachaExperience-AI (U) Ltd')
       on conflict (id) do nothing;
+    `, [DEFAULT_TENANT_ID]);
 
+    await this.query(`
       insert into app_state (tenant_id, payload)
       values ($1, $2::jsonb)
       on conflict (tenant_id) do nothing;

@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { hashPassword, signSession, verifyPassword, verifySession } from "./security.mjs";
+import netlifyApi from "../netlify/functions/api.mjs";
 
 test("password hashes verify the original password only", async () => {
   const hash = await hashPassword("commercial-grade-passphrase");
@@ -19,4 +20,13 @@ test("signed sessions reject tampered payloads", () => {
   assert.equal(verifySession(token, secret)?.userId, "usr_1");
   assert.equal(verifySession(tampered, secret), null);
   assert.equal(verifySession(`${payload}.invalid`, secret), null);
+});
+
+test("Netlify API adapter returns session bootstrap JSON", async () => {
+  const response = await netlifyApi(new Request("https://example.netlify.app/api/session"));
+  const payload = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(payload.authenticated, false);
+  assert.equal(payload.needsBootstrap, true);
 });
