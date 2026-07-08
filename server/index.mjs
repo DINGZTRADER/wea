@@ -36,6 +36,7 @@ const store = process.env.DATABASE_URL
   : new FileStore();
 
 const ai = GEMINI_API_KEY ? new GoogleGenAI({ apiKey: GEMINI_API_KEY }) : null;
+const storeReady = store.init();
 
 function sendJson(res, statusCode, payload, headers = {}) {
   res.writeHead(statusCode, {
@@ -394,8 +395,9 @@ async function serveStatic(req, res, pathname) {
   }
 }
 
-async function requestHandler(req, res) {
+export async function requestHandler(req, res) {
   try {
+    await storeReady;
     const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
     const pathname = url.pathname;
 
@@ -430,9 +432,12 @@ async function requestHandler(req, res) {
   }
 }
 
-await store.init();
+const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
-http.createServer(requestHandler).listen(PORT, () => {
-  const mode = process.env.DATABASE_URL ? "PostgreSQL" : "local file database";
-  console.log(`WEA API listening on http://localhost:${PORT} using ${mode}`);
-});
+if (isDirectRun) {
+  await storeReady;
+  http.createServer(requestHandler).listen(PORT, () => {
+    const mode = process.env.DATABASE_URL ? "PostgreSQL" : "local file database";
+    console.log(`WEA API listening on http://localhost:${PORT} using ${mode}`);
+  });
+}
